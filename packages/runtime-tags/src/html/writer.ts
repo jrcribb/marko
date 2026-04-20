@@ -845,19 +845,19 @@ export function _try(
   const branchId = _peek_scope_id();
   $chunk.writeHTML($chunk.boundary.state.mark(ResumeSymbol.BranchStart, ""));
 
-  const catchContent = normalizeDynamicRenderer(input.catch) as
-    | ServerRenderer
-    | undefined;
+  const catchContent = input.catch
+    ? (normalizeDynamicRenderer(input.catch) as ServerRenderer | undefined) || 0
+    : undefined;
   const placeholderContent = normalizeDynamicRenderer(input.placeholder) as
     | ServerRenderer
     | undefined;
 
-  if (catchContent) {
+  if (catchContent !== undefined) {
     tryCatch(
       placeholderContent
         ? () => tryPlaceholder(content, placeholderContent, branchId)
         : content,
-      catchContent,
+      catchContent || (() => {}),
     );
   } else if (placeholderContent) {
     tryPlaceholder(content, placeholderContent, branchId);
