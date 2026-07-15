@@ -1282,7 +1282,7 @@ export function finalizeReferences() {
   forEachSection((section) => {
     const { id, bindings } = section;
     const isOwnedBinding = ({ section }: Binding) => section.id === id;
-    let intersections = (intersectionsBySection.get(section) || []).filter(
+    const intersections = (intersectionsBySection.get(section) || []).filter(
       (intersection) => {
         const collapseSource = getCollapsibleIntersectionSource(
           intersection,
@@ -1305,7 +1305,7 @@ export function finalizeReferences() {
         }
       }
 
-      intersections = [...intersections].sort((a, b) => {
+      intersections.sort((a, b) => {
         const aAnchor = anchors.get(a);
         const bAnchor = anchors.get(b);
         return aAnchor
@@ -1376,16 +1376,16 @@ export function finalizeReferences() {
 function getMaxOwnSourceOffset(intersection: Intersection, section: Section) {
   let scopeOffset: Binding | undefined;
 
+  const trackScopeOffset = (source: Binding) => {
+    if (
+      source.scopeOffset &&
+      (!scopeOffset || scopeOffset.id < source.scopeOffset.id)
+    ) {
+      scopeOffset = source.scopeOffset;
+    }
+  };
   for (const binding of intersection) {
     if (binding.section === section && binding.sources) {
-      const trackScopeOffset = (source: Binding) => {
-        if (
-          source.scopeOffset &&
-          (!scopeOffset || scopeOffset.id < source.scopeOffset.id)
-        ) {
-          scopeOffset = source.scopeOffset;
-        }
-      };
       forEach(binding.sources.state, trackScopeOffset);
       forEach(binding.sources.param, trackScopeOffset);
     }
